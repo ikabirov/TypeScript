@@ -13186,7 +13186,8 @@ namespace ts {
         function getUnmatchedProperty(source: Type, target: Type, requireOptionalProperties: boolean) {
             const properties = target.flags & TypeFlags.Intersection ? getPropertiesOfUnionOrIntersectionType(<IntersectionType>target) : getPropertiesOfObjectType(target);
             for (const targetProp of properties) {
-                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional)) {
+                const tmp = getTypeOfSymbol(targetProp);
+                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional || typeToString(tmp).indexOf('undefined') >= 0)) {
                     const sourceProp = getPropertyOfType(source, targetProp.escapedName);
                     if (!sourceProp) {
                         return targetProp;
@@ -16658,7 +16659,7 @@ namespace ts {
                             }
                             else if (i < patternElements.length - 1 || !(e.kind === SyntaxKind.BindingElement && (<BindingElement>e).dotDotDotToken || e.kind === SyntaxKind.SpreadElement)) {
                                 if (e.kind !== SyntaxKind.OmittedExpression) {
-                                    error(e, Diagnostics.Initializer_provides_no_value_for_this_binding_element_and_the_binding_element_has_no_default_value);
+                                    //error(e, Diagnostics.Initializer_provides_no_value_for_this_binding_element_and_the_binding_element_has_no_default_value);
                                 }
                                 elementTypes.push(strictNullChecks ? implicitNeverType : undefinedWideningType);
                             }
@@ -16899,8 +16900,8 @@ namespace ts {
                 for (const prop of getPropertiesOfType(contextualType!)) {
                     if (!propertiesTable.get(prop.escapedName) && !(spread && getPropertyOfType(spread, prop.escapedName))) {
                         if (!(prop.flags & SymbolFlags.Optional)) {
-                            error(prop.valueDeclaration || (<TransientSymbol>prop).bindingElement,
-                                Diagnostics.Initializer_provides_no_value_for_this_binding_element_and_the_binding_element_has_no_default_value);
+                            //error(prop.valueDeclaration || (<TransientSymbol>prop).bindingElement,
+                                //Diagnostics.Initializer_provides_no_value_for_this_binding_element_and_the_binding_element_has_no_default_value);
                         }
                         propertiesTable.set(prop.escapedName, prop);
                         propertiesArray.push(prop);

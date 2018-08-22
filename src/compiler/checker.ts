@@ -18146,15 +18146,24 @@ namespace ts {
                         relatedInfo = suggestion.valueDeclaration && createDiagnosticForNode(suggestion.valueDeclaration, Diagnostics._0_is_declared_here, suggestedName);
                     }
                     else {
-                        errorInfo = chainDiagnosticMessages(errorInfo, Diagnostics.Property_0_does_not_exist_on_type_1, declarationNameToString(propNode), typeToString(containingType));
+                        const containingTypeString = typeToString(containingType);
+                        const whitelist = ['Node', 'ChildNode', 'Element'];
+                        if (whitelist.indexOf(containingTypeString) < 0)
+                        {
+                            errorInfo = chainDiagnosticMessages(errorInfo, Diagnostics.Property_0_does_not_exist_on_type_1, declarationNameToString(propNode), containingTypeString);
+                        }
                     }
                 }
             }
-            const resultDiagnostic = createDiagnosticForNodeFromMessageChain(propNode, errorInfo);
-            if (relatedInfo) {
-                addRelatedInfo(resultDiagnostic, relatedInfo);
+
+            if (errorInfo)
+            {
+                const resultDiagnostic = createDiagnosticForNodeFromMessageChain(propNode, errorInfo);
+                if (relatedInfo) {
+                    addRelatedInfo(resultDiagnostic, relatedInfo);
+                }
+                diagnostics.add(resultDiagnostic);
             }
-            diagnostics.add(resultDiagnostic);
         }
 
         function typeHasStaticProperty(propName: __String, containingType: Type): boolean {

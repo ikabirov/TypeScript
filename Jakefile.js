@@ -677,7 +677,7 @@ function cleanTestDirs() {
 
 function tsbuild(tsconfigPath, useLkg = true, done = undefined) {
     const startCompileTime = Travis.mark();
-    const compilerPath = useLkg ? Paths.lkgCompiler : Paths.builtLocalCompiler;
+    const compilerPath = useLkg ? Paths.lkgCompiler : Paths.lkgCompiler;
     const cmd = `${host} ${compilerPath} -b ${Array.isArray(tsconfigPath) ? tsconfigPath.join(" ") : tsconfigPath}`;
 
     exec(cmd, () => {

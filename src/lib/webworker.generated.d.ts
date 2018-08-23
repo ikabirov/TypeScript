@@ -388,7 +388,7 @@ interface TextDecoderOptions {
 }
 
 interface EventListener {
-    (evt: Event): void;
+    handleEvent(evt: Event): void;
 }
 
 interface AbortController {

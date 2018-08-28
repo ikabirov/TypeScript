@@ -13186,8 +13186,8 @@ namespace ts {
         function getUnmatchedProperty(source: Type, target: Type, requireOptionalProperties: boolean) {
             const properties = target.flags & TypeFlags.Intersection ? getPropertiesOfUnionOrIntersectionType(<IntersectionType>target) : getPropertiesOfObjectType(target);
             for (const targetProp of properties) {
-                const tmp = getTypeOfSymbol(targetProp);
-                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional || typeToString(tmp).search(/undefined|any/) >= 0)) {
+                const type = getTypeOfSymbol(targetProp);
+                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional || isTypeAssignableTo(undefinedType, type))) {
                     const sourceProp = getPropertyOfType(source, targetProp.escapedName);
                     if (!sourceProp) {
                         return targetProp;

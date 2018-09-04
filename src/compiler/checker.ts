@@ -19561,7 +19561,7 @@ namespace ts {
                 const signature = resolveCall(node, callSignatures, candidatesOutArray, isForSignatureHelp);
                 if (!noImplicitAny) {
                     if (signature.declaration && !isJavascriptConstructor(signature.declaration) && getReturnTypeOfSignature(signature) !== voidType) {
-                        error(node, Diagnostics.Only_a_void_function_can_be_called_with_the_new_keyword);
+                        //error(node, Diagnostics.Only_a_void_function_can_be_called_with_the_new_keyword);
                     }
                     if (getThisTypeOfSignature(signature) === voidType) {
                         error(node, Diagnostics.A_function_that_is_called_with_the_new_keyword_cannot_have_a_this_type_that_is_void);

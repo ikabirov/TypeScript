@@ -781,13 +781,38 @@ namespace ts {
             return scriptKind === ScriptKind.TSX || scriptKind === ScriptKind.JSX || scriptKind === ScriptKind.JS || scriptKind === ScriptKind.JSON ? LanguageVariant.JSX : LanguageVariant.Standard;
         }
 
+
+        function processTypedefs(value:string):string {
+            const typedefs:string[] = [];
+
+            value = value.replace(/\/\*\*[^\/]*?@typedef ({{[^\/]*?}})[^\/]*?\*\/\s*let\s*([a-zA-Z0-9]+);/g, (match, type, def) => {
+                typedefs.push(def);
+                return match
+                    .replace(`${type}`, `${type} ${def}`)
+                    .replace(`${def};`, `${def}2;`)
+            });
+
+            for (const type of typedefs)
+            {
+                value = value.replace(/export {[^/]*?}/g, (match) => {
+                    return match.replace(type, type + '2');
+                });
+            }
+
+            return value;
+        }
+
+        function removeUnusedAsterisks(value:string):string {
+            return value.replace(/\/\*\*([^\/]*?)\*\//g, (_, content:string) => `/**${content.replace(/(\n\s*)\*/g, '$1 ')}*/`);
+        }
+
         function initializeState(_sourceText: string, languageVersion: ScriptTarget, _syntaxCursor: IncrementalParser.SyntaxCursor | undefined, scriptKind: ScriptKind) {
             NodeConstructor = objectAllocator.getNodeConstructor();
             TokenConstructor = objectAllocator.getTokenConstructor();
             IdentifierConstructor = objectAllocator.getIdentifierConstructor();
             SourceFileConstructor = objectAllocator.getSourceFileConstructor();
 
-            sourceText = _sourceText.replace(/\/\*\*([^\/]*?)\*\//g, (_, content) => `/**${content.replace(/(\n\s*)\*/g, '$1 ')}*/`);
+            sourceText = removeUnusedAsterisks(processTypedefs(_sourceText));
             syntaxCursor = _syntaxCursor;
 
             parseDiagnostics = [];

@@ -4,7 +4,7 @@ describe("parse document", () => {
 	function processTypedefs(value) {
 		const typedefs = [];
 
-		value = value.replace(/\/\*\*[^\/]*?@typedef ({{[^\/]*?}})[^\/]*?\*\/\s*let\s*([a-zA-Z0-9]+);/g, (match, type, def) => {
+		value = value.replace(/\/\*\*[^\/]*?@typedef ({[^\/]*})[^\/]*?\*\/\s*let\s*([a-zA-Z0-9]+);/g, (match, type, def) => {
 			typedefs.push(def);
 			return match
 				.replace(`${type}`, `${type} ${def}`)
@@ -72,6 +72,50 @@ function test(article) {
 export {
 	MyType2,
 }`
+		expect(processTypedefs(text)).equal(expected);
+	});
+
+	it("replace typedefs2", () => {
+		const text = `/**
+ * @typedef {string}
+ */
+let ContentStateRecordType;
+
+/**
+ * @param {ContentStateRecordType} a
+ */
+function t(a) {
+	/**
+	 * @type {number}
+	 */
+	let x = a;
+}
+t(1);
+
+export {
+	ContentStateRecordType,
+}
+`;
+		const expected = `/**
+ * @typedef {string} ContentStateRecordType
+ */
+let ContentStateRecordType2;
+
+/**
+ * @param {ContentStateRecordType} a
+ */
+function t(a) {
+	/**
+	 * @type {number}
+	 */
+	let x = a;
+}
+t(1);
+
+export {
+	ContentStateRecordType2,
+}
+`
 		expect(processTypedefs(text)).equal(expected);
 	});
 });

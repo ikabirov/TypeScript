@@ -785,7 +785,7 @@ namespace ts {
         function processTypedefs(value:string):string {
             const typedefs:string[] = [];
 
-            value = value.replace(/\/\*\*[^\/]*?@typedef ({{[^\/]*?}})[^\/]*?\*\/\s*let\s*([a-zA-Z0-9]+);/g, (match, type, def) => {
+            value = value.replace(/\/\*\*[^\/]*?@typedef ({[^\/]*})[^\/]*?\*\/\s*let\s*([a-zA-Z0-9]+);/g, (match, type, def) => {
                 typedefs.push(def);
                 return match
                     .replace(`${type}`, `${type} ${def}`)

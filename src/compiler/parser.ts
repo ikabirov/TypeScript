@@ -785,17 +785,19 @@ namespace ts {
         function processTypedefs(value:string):string {
             const typedefs:string[] = [];
 
+            const replacements:any = {};
             value = value.replace(/\/\*\*[^\/]*?@typedef ({[^\/]*})[^\/]*?\*\/\s*let\s*([a-zA-Z0-9]+);/g, (match, type, def) => {
                 typedefs.push(def);
+                replacements[def] = def.slice(0, -1) + '_';
                 return match
                     .replace(`${type}`, `${type} ${def}`)
-                    .replace(`${def};`, `${def}2;`)
+                    .replace(`${def};`, `${replacements[def]};`)
             });
 
             for (const type of typedefs)
             {
                 value = value.replace(/export {[^/]*?}/g, (match) => {
-                    return match.replace(type, type + '2');
+                    return match.replace(type, replacements[type]);
                 });
             }
 

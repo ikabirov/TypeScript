@@ -452,7 +452,7 @@ interface WorkerOptions {
 }
 
 interface EventListener {
-    (evt: Event): void;
+    handleEvent(evt: Event): void;
 }
 
 interface ANGLE_instanced_arrays {

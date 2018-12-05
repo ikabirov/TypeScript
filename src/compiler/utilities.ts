@@ -5324,6 +5324,11 @@ namespace ts {
         return getJSDocTags(node).filter(doc => doc.kind === kind);
     }
 
+    /** Gets the nameless JSDoc typedef tag for the node if present */
+    export function getJSDocNamelessTypedefTag(node: Node): JSDocTypedefTag | undefined {
+        return getFirstJSDocTag(node, (n): n is JSDocTypedefTag => isJSDocTypedefTag(n) && !n.name);
+    }
+
     /**
      * Gets the effective type parameters. If the node was parsed in a
      * JavaScript file, gets the type parameters from the `@template` tag from JSDoc.
@@ -6067,6 +6072,10 @@ namespace ts {
 
     export function isJSDocSignature(node: Node): node is JSDocSignature {
         return node.kind === SyntaxKind.JSDocSignature;
+    }
+
+    export function isNamelessJSDocTypeDef(node: Node): boolean {
+        return !!getJSDocNamelessTypedefTag(node);
     }
 }
 

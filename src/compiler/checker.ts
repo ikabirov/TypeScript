@@ -13862,7 +13862,8 @@ namespace ts {
         function* getUnmatchedProperties(source: Type, target: Type, requireOptionalProperties: boolean) {
             const properties = target.flags & TypeFlags.Intersection ? getPropertiesOfUnionOrIntersectionType(<IntersectionType>target) : getPropertiesOfObjectType(target);
             for (const targetProp of properties) {
-                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional)) {
+                const type = getTypeOfSymbol(targetProp);
+                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional || isTypeAssignableTo(undefinedType, type))) {
                     const sourceProp = getPropertyOfType(source, targetProp.escapedName);
                     if (!sourceProp) {
                         yield targetProp;

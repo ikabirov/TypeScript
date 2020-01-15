@@ -2322,13 +2322,18 @@ namespace ts {
                     else {
                         symbolFromVariable = getPropertyOfVariable(targetSymbol, name.escapedText);
                     }
+
                     // if symbolFromVariable is export - get its final target
                     symbolFromVariable = resolveSymbol(symbolFromVariable, dontResolveAlias);
+
                     let symbolFromModule = getExportOfModule(targetSymbol, name.escapedText, dontResolveAlias);
-                    // If the export member we're looking for is default, and there is no real default but allowSyntheticDefaultImports is on, return the entire module as the default
-                    if (!symbolFromModule && allowSyntheticDefaultImports && name.escapedText === InternalSymbolName.Default) {
-                        symbolFromModule = resolveExternalModuleSymbol(moduleSymbol, dontResolveAlias) || resolveSymbol(moduleSymbol, dontResolveAlias);
+                    if (symbolFromModule === undefined && name.escapedText === InternalSymbolName.Default) {
+                        const file = find(moduleSymbol.declarations, isSourceFile);
+                        if (canHaveSyntheticDefault(file, moduleSymbol, dontResolveAlias)) {
+                            symbolFromModule = resolveExternalModuleSymbol(moduleSymbol, dontResolveAlias) || resolveSymbol(moduleSymbol, dontResolveAlias);
+                        }
                     }
+
                     const symbol = symbolFromModule && symbolFromVariable && symbolFromModule !== symbolFromVariable ?
                         combineValueAndTypeSymbols(symbolFromVariable, symbolFromModule) :
                         symbolFromModule || symbolFromVariable;
@@ -12901,8 +12906,9 @@ namespace ts {
 
         /** We approximate own properties as non-methods plus methods that are inside the object literal */
         function isSpreadableProperty(prop: Symbol): boolean {
-            return !(prop.flags & (SymbolFlags.Method | SymbolFlags.GetAccessor | SymbolFlags.SetAccessor)) ||
-                !prop.declarations.some(decl => isClassLike(decl.parent));
+            return !some(prop.declarations, isPrivateIdentifierPropertyDeclaration) &&
+                (!(prop.flags & (SymbolFlags.Method | SymbolFlags.GetAccessor | SymbolFlags.SetAccessor)) ||
+                    !prop.declarations.some(decl => isClassLike(decl.parent)));
         }
 
         function getSpreadSymbol(prop: Symbol, readonly: boolean) {

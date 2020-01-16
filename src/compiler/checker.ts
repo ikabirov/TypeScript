@@ -17585,7 +17585,8 @@ namespace ts {
                 if (isStaticPrivateIdentifierProperty(targetProp)) {
                     continue;
                 }
-                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional || getCheckFlags(targetProp) & CheckFlags.Partial)) {
+                const type = getTypeOfSymbol(targetProp);
+                if (requireOptionalProperties || !(targetProp.flags & SymbolFlags.Optional || getCheckFlags(targetProp) & CheckFlags.Partial || isTypeAssignableTo(undefinedType, type))) {
                     const sourceProp = getPropertyOfType(source, targetProp.escapedName);
                     if (!sourceProp) {
                         yield targetProp;

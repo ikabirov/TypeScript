@@ -1988,16 +1988,16 @@ function someFunction(someOptionalObject: SomeObject | undefined): void {
 
         console.log(someOptionalObject);
 >console.log(someOptionalObject) : void
->console.log : (message?: any, ...optionalParams: any[]) => void
+>console.log : (...data: any[]) => void
 >console : Console
->log : (message?: any, ...optionalParams: any[]) => void
+>log : (...data: any[]) => void
 >someOptionalObject : SomeObject | undefined
 
         console.log(someOptionalObject.someProperty);  // Error
 >console.log(someOptionalObject.someProperty) : void
->console.log : (message?: any, ...optionalParams: any[]) => void
+>console.log : (...data: any[]) => void
 >console : Console
->log : (message?: any, ...optionalParams: any[]) => void
+>log : (...data: any[]) => void
 >someOptionalObject.someProperty : unknown
 >someOptionalObject : SomeObject | undefined
 >someProperty : unknown
@@ -2030,4 +2030,46 @@ someFunction(undefined);
 >someFunction(undefined) : void
 >someFunction : (someOptionalObject: SomeObject | undefined) => void
 >undefined : undefined
+
+// Repro from #35970
+
+let i = 0;
+>i : number
+>0 : 0
+
+declare const arr: { tag: ("left" | "right") }[];
+>arr : { tag: "left" | "right"; }[]
+>tag : "left" | "right"
+
+while (arr[i]?.tag === "left") {
+>arr[i]?.tag === "left" : boolean
+>arr[i]?.tag : "left" | "right"
+>arr[i] : { tag: "left" | "right"; }
+>arr : { tag: "left" | "right"; }[]
+>i : number
+>tag : "left" | "right"
+>"left" : "left"
+
+    i += 1;
+>i += 1 : number
+>i : number
+>1 : 1
+
+    if (arr[i]?.tag === "right") {
+>arr[i]?.tag === "right" : boolean
+>arr[i]?.tag : "left" | "right"
+>arr[i] : { tag: "left" | "right"; }
+>arr : { tag: "left" | "right"; }[]
+>i : number
+>tag : "left" | "right"
+>"right" : "right"
+
+        console.log("I should ALSO be reachable");
+>console.log("I should ALSO be reachable") : void
+>console.log : (...data: any[]) => void
+>console : Console
+>log : (...data: any[]) => void
+>"I should ALSO be reachable" : "I should ALSO be reachable"
+    }
+}
 

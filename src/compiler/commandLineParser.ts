@@ -1115,7 +1115,8 @@ namespace ts {
         target: ScriptTarget.ES5,
         strict: true,
         esModuleInterop: true,
-        forceConsistentCasingInFileNames: true
+        forceConsistentCasingInFileNames: true,
+        skipLibCheck: true
     };
 
     /* @internal */
@@ -1463,7 +1464,8 @@ namespace ts {
         optionsToExtend: CompilerOptions,
         host: ParseConfigFileHost,
         extendedConfigCache?: Map<ExtendedConfigCacheEntry>,
-        watchOptionsToExtend?: WatchOptions
+        watchOptionsToExtend?: WatchOptions,
+        extraFileExtensions?: readonly FileExtensionInfo[],
     ): ParsedCommandLine | undefined {
         const configFileText = tryReadFile(configFileName, fileName => host.readFile(fileName));
         if (!isString(configFileText)) {
@@ -1483,7 +1485,7 @@ namespace ts {
             optionsToExtend,
             getNormalizedAbsolutePath(configFileName, cwd),
             /*resolutionStack*/ undefined,
-            /*extraFileExtension*/ undefined,
+            extraFileExtensions,
             extendedConfigCache,
             watchOptionsToExtend
         );
@@ -2119,15 +2121,12 @@ namespace ts {
             // Serialize all options and their descriptions
             let marginLength = 0;
             let seenKnownKeys = 0;
-            const nameColumn: string[] = [];
-            const descriptionColumn: string[] = [];
+            const entries: { value: string, description?: string }[] = [];
             categorizedOptions.forEach((options, category) => {
-                if (nameColumn.length !== 0) {
-                    nameColumn.push("");
-                    descriptionColumn.push("");
+                if (entries.length !== 0) {
+                    entries.push({ value: "" });
                 }
-                nameColumn.push(`/* ${category} */`);
-                descriptionColumn.push("");
+                entries.push({ value: `/* ${category} */` });
                 for (const option of options) {
                     let optionName;
                     if (compilerOptionsMap.has(option.name)) {
@@ -2136,8 +2135,10 @@ namespace ts {
                     else {
                         optionName = `// "${option.name}": ${JSON.stringify(getDefaultValueForOption(option))},`;
                     }
-                    nameColumn.push(optionName);
-                    descriptionColumn.push(`/* ${option.description && getLocaleSpecificMessage(option.description) || option.name} */`);
+                    entries.push({
+                        value: optionName,
+                        description: `/* ${option.description && getLocaleSpecificMessage(option.description) || option.name} */`
+                    });
                     marginLength = Math.max(optionName.length, marginLength);
                 }
             });
@@ -2147,11 +2148,12 @@ namespace ts {
             const result: string[] = [];
             result.push(`{`);
             result.push(`${tab}"compilerOptions": {`);
+            result.push(`${tab}${tab}/* ${getLocaleSpecificMessage(Diagnostics.Visit_https_Colon_Slash_Slashaka_ms_Slashtsconfig_json_to_read_more_about_this_file)} */`);
+            result.push("");
             // Print out each row, aligning all the descriptions on the same column.
-            for (let i = 0; i < nameColumn.length; i++) {
-                const optionName = nameColumn[i];
-                const description = descriptionColumn[i];
-                result.push(optionName && `${tab}${tab}${optionName}${description && (makePadding(marginLength - optionName.length + 2) + description)}`);
+            for (const entry of entries) {
+                const { value, description = "" } = entry;
+                result.push(value && `${tab}${tab}${value}${description && (makePadding(marginLength - value.length + 2) + description)}`);
             }
             if (fileNames.length) {
                 result.push(`${tab}},`);

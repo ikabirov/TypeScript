@@ -1902,7 +1902,7 @@ interface txAuthGenericArg {
 }
 
 interface EventListener {
-    (evt: Event): void;
+    handleEvent(evt: Event): void;
 }
 
 type XPathNSResolver = ((prefix: string | null) => string | null) | { lookupNamespaceURI(prefix: string | null): string | null; };
